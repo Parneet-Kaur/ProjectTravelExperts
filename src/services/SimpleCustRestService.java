@@ -147,6 +147,33 @@ public class SimpleCustRestService {
 				
 		        return "allo";// test string just to get status 	
 	}
+	
+	//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/createbooking
+	@POST
+	@Path("/createbooking")
+    @Produces(MediaType.TEXT_PLAIN)
+	public String postBooking(@FormParam("book") String book) {
+				
+				//to convert JSON data to entity		
+				String request = book;//JSON
+				Gson gson = new Gson();				
+				Type type = new TypeToken<Booking>(){}.getType();
+				Booking b= gson.fromJson(request, type);
+				//Package p = gson.fromJson(request, type);
+				
+				// pass the entity to persistence framework
+				EntityManagerFactory factory = Persistence.createEntityManagerFactory("ProjectTravelExperts");
+				EntityManager em = factory.createEntityManager();
+				
+				//won't work without transaction, throws exception
+				  em.getTransaction().begin();
+				  em.persist(b);
+				  em.getTransaction().commit();
+
+				
+				
+		        return "Success";// test string just to get status 	
+	}
 
 	@PUT
 	@Path("/<add method name here>")
