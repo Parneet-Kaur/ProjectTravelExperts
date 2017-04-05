@@ -126,15 +126,26 @@ public class SimpleCustRestService {
 	@POST
 	@Path("/createpackage")
     @Produces(MediaType.TEXT_PLAIN)
-	public String postPackage(@FormParam("userid") String userid,@FormParam("name") String name) {
+	public String postPackage(@FormParam("pack") String pack) {
 				
-				StringBuilder sb = new StringBuilder(userid);		
-				String request = userid;//JSON
+				//to convert JSON data to entity		
+				String request = pack;//JSON
 				Gson gson = new Gson();				
 				Type type = new TypeToken<Package>(){}.getType();
 				Package p = gson.fromJson(request, type);
 				
-		        return p.getPkgName();	
+				// pass the entity to persistence framework
+				EntityManagerFactory factory = Persistence.createEntityManagerFactory("ProjectTravelExperts");
+				EntityManager em = factory.createEntityManager();
+				
+				//won't work without transaction, throws exception
+				  em.getTransaction().begin();
+				  em.persist(p);
+				  em.getTransaction().commit();
+
+				
+				
+		        return "allo";// test string just to get status 	
 	}
 
 	@PUT
