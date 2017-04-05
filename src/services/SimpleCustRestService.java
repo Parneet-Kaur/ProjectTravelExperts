@@ -32,7 +32,7 @@ import model.Booking;
 import model.Customer;
 import model.Package;
 
-//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/test/delta
+//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/test/lima
 @Path("/travelexperts")
 public class SimpleCustRestService {
 		
@@ -83,7 +83,7 @@ public class SimpleCustRestService {
 			Query q = em.createQuery("select p from Package p ");
 			//Customer cust = (Customer)q.getSingleResult();//There could be multiple bookings for a single customer
 			
-			List<Package[]> pack=q.getResultList();//since there could be multiple bookings we ll need a list
+			List<Package> pack=q.getResultList();//since there could be multiple bookings we ll need a list
 			//Booking book=(Booking)q.getResultList();
 			
 			Gson gson = new Gson();
@@ -98,14 +98,43 @@ public class SimpleCustRestService {
 			        
 		}
 
+		//method to get details about a single package
+		@GET
+		@Path("/getpackagedetails/{packid}")
+	    @Produces(MediaType.APPLICATION_JSON)
+		public String getPackage(@PathParam("packid") String packid) {
+			
+			//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/getpackagedetails
+			EntityManagerFactory factory = Persistence.createEntityManagerFactory("ProjectTravelExperts");
+			EntityManager em = factory.createEntityManager();
+			Query q = em.createQuery("select p from Package p  where p.packageId='" + packid + "'");
+			//Customer cust = (Customer)q.getSingleResult();
+			Package pack=(Package)q.getSingleResult();
+			Gson gson = new Gson();
+			Type type = new TypeToken<Package>(){}.getType();
+			String json = gson.toJson(pack, type);
+			
+			em.close();
+			factory.close();
+			
+			
+	        return json;        
+		}
 
-	
+
+		//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/createpackage
 	@POST
-	@Path("/<add method name here>")
+	@Path("/createpackage")
     @Produces(MediaType.TEXT_PLAIN)
-	public String postSomething(@FormParam("request") String request ,  @DefaultValue("1") @FormParam("version") int version) {
-
-		        return request;	
+	public String postPackage(@FormParam("userid") String userid,@FormParam("name") String name) {
+				
+				StringBuilder sb = new StringBuilder(userid);		
+				String request = userid;//JSON
+				Gson gson = new Gson();				
+				Type type = new TypeToken<Package>(){}.getType();
+				Package p = gson.fromJson(request, type);
+				
+		        return p.getPkgName();	
 	}
 
 	@PUT
