@@ -72,6 +72,65 @@ public class SimpleCustRestService {
 			        
 		}
 		
+		
+		@GET
+		@Path("/myaccount/{custid}")
+	    @Produces(MediaType.APPLICATION_JSON)
+		public String getMyAccount(@PathParam("custid") String custid) {
+			
+			//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/myaccount/143
+			EntityManagerFactory factory = Persistence.createEntityManagerFactory("ProjectTravelExperts");
+			EntityManager em = factory.createEntityManager();
+			Query q = em.createQuery("select c from Customer c where c.customerId='" + custid + "'");
+			Customer cust = (Customer)q.getSingleResult();
+			
+			Gson gson = new Gson();
+			Type type = new TypeToken<Customer>(){}.getType();
+			String json = gson.toJson(cust, type);
+			
+			em.close();
+			factory.close();
+			
+			
+	        return json;		        
+		}
+		
+		@GET
+		@Path("/updatecustomer/{custid}")
+	    @Produces(MediaType.APPLICATION_JSON)
+		public String getUpdateCustAccount(@PathParam("custid") int custid,@FormParam("cust") String custUpdate) {
+			
+			//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/updatecustomer/143
+			EntityManagerFactory factory = Persistence.createEntityManagerFactory("ProjectTravelExperts");
+			EntityManager em = factory.createEntityManager();
+			Query q = em.createQuery("select c from Customer c where c.customerId='" + custid + "'");
+						
+			Customer c1=em.find(Customer.class, custid);
+			//*****************************************************
+			//to convert JSON data to entity		
+			String request = custUpdate;//JSON
+			Gson gson = new Gson();				
+			Type type = new TypeToken<Customer>(){}.getType();
+			Package p = gson.fromJson(request, type);
+			
+			//won't work without transaction, throws exception
+			  em.getTransaction().begin();
+			  em.persist(p);
+			  em.getTransaction().commit();			
+			//****************************************************
+			
+			em.close();
+			factory.close();			
+			
+	        return "hallelujah";//test string for success message        
+		}
+		
+		
+		
+		
+		
+		
+		
 		@GET
 		@Path("/getpackages")
 	    @Produces(MediaType.APPLICATION_JSON)
@@ -148,6 +207,26 @@ public class SimpleCustRestService {
 		        return "allo";// test string just to get status 	
 	}
 	
+	
+	//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/createpackage
+	@POST
+	@Path("/updatepassword")
+    @Produces(MediaType.TEXT_PLAIN)
+	public String postUpdatePassword(@FormParam("userid") int userid, @FormParam("password") String password) {
+				
+		
+		//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/updatepassword
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory("ProjectTravelExperts");
+		EntityManager em = factory.createEntityManager();
+	
+		Customer cust= em.find(Customer.class, userid);//retrieve data for a specific userid received via form data
+		em.getTransaction().begin();
+		cust.setCustPassword(password);//update password for a specific user
+		em.getTransaction().commit();
+		
+		return "password updated";// test string just to get status 	
+	}
+
 	//http://localhost:8080/ProjectTravelExperts/rs/travelexperts/createbooking
 	@POST
 	@Path("/createbooking")
@@ -156,6 +235,7 @@ public class SimpleCustRestService {
 				
 				//to convert JSON data to entity		
 				String request = book;//JSON
+	
 				Gson gson = new Gson();				
 				Type type = new TypeToken<Booking>(){}.getType();
 				Booking b= gson.fromJson(request, type);
